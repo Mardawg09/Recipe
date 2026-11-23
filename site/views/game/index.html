@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pantry Roulette</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="game.css">
+</head><body>
+<header class="site-header">
+  <nav class="navbar">
+    <a class="brand" href="index.html"><span class="brand-icon">+</span><span class="brand-text">Pantry Roulette<small>Guess the ingredients</small></span></a>
+    <ul class="nav-links"></ul>
+  </nav>
+</header>
+
+<main class="game">
+  <section><h2>Choose a level</h2><div id="levels" class="levels">Loading...</div></section>
+
+  <section id="board" hidden>
+    <div class="ticket">
+      <span class="tag" id="tCuisine"></span>
+      <h3 id="tName"></h3>
+      <p id="tDesc"></p>
+      <p class="need">Pick exactly <b id="tNeeds"></b> ingredients from the shuffled pantry.</p>
+    </div>
+    <div id="pantry" class="pantry"></div>
+    <div class="actions">
+      <button id="cookBtn" type="button">Cook it!</button>
+      <button id="newBtn" type="button" class="secondary">New random order</button>
+      <span id="picked">0 selected</span>
+    </div>
+    <p id="feedback" role="status"></p>
+  </section>
+</main>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div id="modalCard" class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<footer><p>Cook recipes by finding their ingredients</p></footer>
+<script src="../../auth.js"></script>
+<script src="app.js"></script>
+</body></html>

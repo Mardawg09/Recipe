@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>International Recipes</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+
+        <nav class="navbar" aria-label="Primary">
+            <a class="brand" href="index.html">
+                International <span>Recipes</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" aria-current="page">Home</a></li>
+                
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="kicker" data-hero>A kitchen without borders</p>
+
+            <h1 data-hero>Cook something <em>good</em> tonight</h1>
+
+            <p class="sub" data-hero>
+                Recipes gathered from Filipino, Italian, Spanish, British, American, and
+                Chinese kitchens — with the ingredients, steps, and nutrition laid out plainly.
+            </p>
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <!-- SEARCH SECTION -->
+        <section class="search-section" aria-labelledby="search-heading">
+
+            <h2 id="search-heading" class="visually-hidden">Search recipes</h2>
+
+            <div class="search">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Start typing a recipe, ingredient, or cuisine..."
+                    autocomplete="off"
+                >
+
+                <button
+                    class="secondary"
+                    type="button"
+                    onclick="clearSearch()"
+                >
+                    Show all
+                </button>
+            </div>
+
+            <div class="filters" role="group" aria-label="Filter by cuisine" id="filterGroup">
+                <span class="filter-pill" id="filterPill" aria-hidden="true"></span>
+                <button type="button" class="filter-btn active" data-cuisine="all">All</button>
+                <button type="button" class="filter-btn" data-cuisine="filipino">Filipino</button>
+                <button type="button" class="filter-btn" data-cuisine="italian">Italian</button>
+                <button type="button" class="filter-btn" data-cuisine="spanish">Spanish</button>
+                <button type="button" class="filter-btn" data-cuisine="british">British</button>
+                <button type="button" class="filter-btn" data-cuisine="american">American</button>
+                <button type="button" class="filter-btn" data-cuisine="chinese">Chinese</button>
+            </div>
+
+        </section>
+
+
+        <!-- RECIPE GRID SECTION -->
+        <section class="browse-section" aria-labelledby="browse-heading">
+
+            <h2 id="browse-heading">Browse recipes</h2>
+
+            <div
+                id="recipeList"
+                class="recipe-list loading-state"
+            >
+                Loading recipes...
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- RECIPE DETAIL MODAL -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div id="modalCard" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+
+    <footer>
+        <p>Data provided by the Simple Recipe API</p>
+    </footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="../../auth.js"></script>
+<script src="app.js"></script>
+
+</body>
+
+</html>

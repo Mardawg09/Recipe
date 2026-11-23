@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Hub</title>
+<style>
+ html,body{height:100%;margin:0;font-family:system-ui,sans-serif}
+ body{display:flex;flex-direction:column;background:#fff}
+ .bar{display:flex;align-items:center;gap:6px;padding:8px 14px;background:#1f1f1f;color:#fff;flex-wrap:wrap}
+ .bar b{margin-right:10px}
+ .tab{border:0;background:transparent;color:#ddd;padding:9px 16px;border-radius:999px;font-size:.95rem;cursor:pointer}
+ .tab:hover{background:#333}
+ .tab.on{background:#fff;color:#111;font-weight:600}
+ .sp{flex:1}
+ .who{font-size:.85rem;display:flex;align-items:center;gap:8px}
+ .role{padding:2px 8px;border-radius:12px;font-size:.72rem}
+ .role.admin{background:#c1452a}.role.user{background:#6c7f55}.role.editor{background:#b8860b}
+ .out{background:none;border:1px solid #666;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
+ iframe{flex:1;width:100%;border:0;display:none}
+ iframe.on{display:block}
+</style></head><body>
+<div class="bar">
+  <b>Recipe Hub</b>
+  <button class="tab" data-v="international">🌍 International</button>
+  <button class="tab" data-v="budget">₱ Budget</button>
+  <button class="tab" data-v="game">🎲 Pantry Game</button>
+  <span class="sp"></span>
+  <span class="who"><span id="name"></span><span id="role" class="role"></span><button class="out" onclick="logout()">Log out</button></span>
+</div>
+<iframe data-v="international" title="International recipes"></iframe>
+<iframe data-v="budget" title="Budget recipes"></iframe>
+<iframe data-v="game" title="Pantry game"></iframe>
+<script src="auth.js"></script>
+<script>
+requireLogin();
+const u = getUser() || {};
+document.getElementById("name").textContent = u.name || u.email || "";
+document.getElementById("role").textContent = u.role || "user";
+document.getElementById("role").classList.add(u.role || "user");
+
+const views = ["international", "budget", "game"];
+function show(v) {
+  if (!views.includes(v)) v = localStorage.getItem("rp_view") || "international";
+  localStorage.setItem("rp_view", v);
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.v === v));
+  document.querySelectorAll("iframe").forEach(f => {
+    const on = f.dataset.v === v;
+    f.classList.toggle("on", on);
+    if (on && !f.src) f.src = `views/${v}/index.html`;   // load a view the first time it is opened, then keep it alive
+  });
+  if (location.hash !== "#" + v) history.replaceState(null, "", "#" + v);
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => show(t.dataset.v));
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+</script></body></html>

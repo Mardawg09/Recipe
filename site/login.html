@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in</title>
+<style>
+ body{font-family:system-ui,sans-serif;background:#f4f1ea;display:grid;place-items:center;min-height:100vh;margin:0}
+ form{background:#fff;padding:32px;border-radius:16px;width:min(360px,90vw);box-shadow:0 10px 30px #0002;display:grid;gap:12px}
+ input,button{padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc}
+ button{background:#222;color:#fff;border:0;cursor:pointer}
+ a{font-size:.9rem;text-align:center;color:#444;cursor:pointer}
+ #msg{font-size:.9rem;min-height:1.2em;color:#b3261e}
+</style></head><body>
+<form id="f">
+  <h2 id="title" style="margin:0">Log in</h2>
+  <input id="name" placeholder="Your name" style="display:none">
+  <input id="email" type="email" placeholder="Email" required>
+  <input id="password" type="password" placeholder="Password (min 6 characters)" required minlength="6">
+  <button id="go">Log in</button>
+  <div id="msg"></div>
+  <a id="toggle">No account yet? Register</a>
+</form>
+<script>
+let registering = false;
+const $ = id => document.getElementById(id);
+if (localStorage.getItem("rp_token")) location.replace("/");
+
+$("toggle").onclick = () => {
+  registering = !registering;
+  $("title").textContent = $("go").textContent = registering ? "Register" : "Log in";
+  $("name").style.display = registering ? "block" : "none";
+  $("toggle").textContent = registering ? "Have an account? Log in" : "No account yet? Register";
+  $("msg").textContent = "";
+};
+
+$("f").onsubmit = async e => {
+  e.preventDefault();
+  $("msg").style.color = "#b3261e"; $("msg").textContent = "";
+  const payload = { email: $("email").value, password: $("password").value, name: $("name").value };
+  try {
+    let res = await fetch(registering ? "/api/auth/register" : "/api/auth/login",
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    let data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Something went wrong");
+    if (registering) {
+      $("toggle").click();
+      $("msg").style.color = "#2e7d32"; $("msg").textContent = data.message;
+      return;
+    }
+    localStorage.setItem("rp_token", data.access_token);
+    localStorage.setItem("rp_user", JSON.stringify(data.user));
+    location.href = "/";
+  } catch (err) { $("msg").textContent = err.message; }
+};
+</script></body></html>
