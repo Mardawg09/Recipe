@@ -1,332 +1,63 @@
 requireLogin();
 
-let recipes = [];
+const PAGE = 6, STEPS = [200, 300, 500];
+let all = [], max = Infinity, query = "", shown = PAGE;
+const cost = r => Number(r.estimated_cost || 0);
+const per = r => r.servings ? (cost(r) / r.servings).toFixed(2) : "-";
 
+const card = (r, d = 0) => `<article class="card rv" style="--d:${d}ms" data-id="${r.id}">${ph(r)}
+    <div class="cb"><span class="st">${stars(r)}</span><h3>${esc(r.name)}</h3>
+    <small><span class="price">₱${cost(r)}</span> total · ₱${per(r)} per serving · ${r.servings} servings</small></div></article>`;
 
-/* =========================
-   LOAD RECIPES
-========================= */
-
-async function loadRecipes() {
-
-    const container =
-        document.getElementById("recipeList");
-
+async function load() {
     try {
-
-        const response = await authFetch(`/api/recipes`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load recipes");
-        }
-
-        const data = await response.json();
-
-        recipes = data.recipes || [];
-
-        applyFiltersAndRender();
-
-    } catch (error) {
-
-        console.error(error);
-
-        container.innerHTML =
-            "Unable to connect to the API.";
-    }
+        const res = await authFetch("/api/recipes");
+        if (!res.ok) throw new Error();
+        all = ((await res.json()).recipes || []).sort((a, b) => cost(a) - cost(b));
+    } catch { $("#all").innerHTML = '<p class="empty">Unable to load recipes.</p>'; return; }
+    $("#top3").innerHTML = all.slice(0, 3).map((r, i) => card(r, i * 90)).join("");
+    $("#nav").innerHTML = [`<button type="button" data-m="all" class="on">All</button>`,
+        ...STEPS.map(n => `<button type="button" data-m="${n}">Under ₱${n}</button>`)].join("");
+    render();
 }
 
-
-/* =========================
-   FILTER
-========================= */
-
-function applyFiltersAndRender() {
-
-    const search =
-        document
-            .getElementById("searchInput")
-            .value
-            .trim()
-            .toLowerCase();
-
-    const budgetValue =
-        document
-            .getElementById("budgetInput")
-            .value;
-
-    const maxBudget =
-        budgetValue
-            ? Number(budgetValue)
-            : Infinity;
-
-
-    const results = recipes.filter(recipe => {
-
-        const text = [
-            recipe.name,
-            recipe.type,
-            recipe.description,
-            ...(recipe.ingredients || [])
-        ]
-        .join(" ")
-        .toLowerCase();
-
-
-        const matchesSearch =
-            text.includes(search);
-
-
-        const cost =
-            Number(recipe.estimated_cost || 0);
-
-
-        const matchesBudget =
-            cost <= maxBudget;
-
-
-        return matchesSearch && matchesBudget;
-    });
-
-
-    displayRecipes(results);
+function render() {
+    const q = query.toLowerCase();
+    const list = all.filter(r => cost(r) <= max &&
+        (!q || [r.name, r.type, r.description, ...(r.ingredients || [])].join(" ").toLowerCase().includes(q)));
+    $("#count").textContent = `(${list.length})`;
+    $("#all").innerHTML = list.length ? list.slice(0, shown).map((r, i) => card(r, (i % 3) * 90)).join("")
+        : '<p class="empty">No recipes within that budget. Try a higher amount.</p>';
+    $("#more").parentElement.hidden = shown >= list.length;
+    document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", (b.dataset.m === "all" ? Infinity : Number(b.dataset.m)) === max));
+    reveal();
+}
+function apply() {
+    const v = $("#max").value;
+    max = v === "" ? Infinity : Number(v); query = $("#q").value.trim(); shown = PAGE; render();
 }
 
-
-/* =========================
-   DISPLAY
-========================= */
-
-function displayRecipes(data) {
-
-    const container =
-        document.getElementById("recipeList");
-
-    container.classList.remove("loading-state");
-
-    container.innerHTML = "";
-
-
-    if (!data.length) {
-
-        container.innerHTML =
-            "No budget recipes found.";
-
-        return;
-    }
-
-
-    data.forEach(recipe => {
-
-        const card =
-            document.createElement("article");
-
-        card.className = "recipe-card";
-
-
-        card.innerHTML = `
-
-            <div class="recipe-type">
-                ${recipe.type}
-            </div>
-
-            <h3>
-                ${recipe.name}
-            </h3>
-
-            <div class="meta">
-
-                <span>
-                    ₱${recipe.estimated_cost}
-                </span>
-
-                <span>
-                    ${recipe.servings} servings
-                </span>
-
-                <span>
-                    ${recipe.rating} ⭐
-                </span>
-
-            </div>
-
-            <p class="desc">
-                ${recipe.description}
-            </p>
-
-            <button
-                onclick="viewRecipe(${recipe.id})"
-            >
-                View Recipe
-            </button>
-        `;
-
-        container.appendChild(card);
-    });
+async function openRecipe(id) {
+    const res = await authFetch(`/api/recipes/${id}`);
+    if (!res.ok) return;
+    const r = await res.json();
+    $("#mb").innerHTML = `${ph(r)}<h3 id="mt">${esc(r.name)}</h3>
+        <div class="chips"><span>${esc(r.type)}</span><span>${esc(r.difficulty)}</span><span>${stars(r)}</span></div>
+        <p>${esc(r.description)}</p>
+        <h4>Estimated cost</h4><div class="nut"><div><b>₱${cost(r)}</b><small>total</small></div><div><b>₱${per(r)}</b><small>per serving</small></div><div><b>${r.servings}</b><small>servings</small></div></div>
+        <h4>Ingredients</h4><ul>${(r.ingredients || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+        <h4>Steps</h4><ol>${(r.steps || []).map(s => `<li>${esc(s)}</li>`).join("")}</ol>`;
+    showModal();
 }
 
-
-/* =========================
-   RECIPE DETAILS
-========================= */
-
-async function viewRecipe(id) {
-
-    try {
-
-        const response = await authFetch(`/api/recipes/${id}`);
-
-        if (!response.ok) {
-            throw new Error("Unable to load recipe.");
-        }
-
-        const recipe =
-            await response.json();
-
-        openModal(recipe);
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Unable to retrieve recipe.");
-    }
-}
-
-
-function openModal(recipe) {
-
-    const body =
-        document.getElementById("modalBody");
-
-
-    body.innerHTML = `
-
-        <div class="recipe-type">
-            ${recipe.type}
-        </div>
-
-        <h3>
-            ${recipe.name}
-        </h3>
-
-        <div class="meta">
-
-            <span>
-                ₱${recipe.estimated_cost}
-            </span>
-
-            <span>
-                ${recipe.servings} servings
-            </span>
-
-            <span>
-                ${recipe.rating} ⭐
-            </span>
-
-        </div>
-
-        <p class="desc">
-            ${recipe.description}
-        </p>
-
-
-        <h4>Ingredients</h4>
-
-        <ul class="ingredients">
-
-            ${(recipe.ingredients || [])
-                .map(item =>
-                    `<li>${item}</li>`
-                )
-                .join("")}
-
-        </ul>
-
-
-        <h4>Steps</h4>
-
-        <ol class="steps">
-
-            ${(recipe.steps || [])
-                .map(step =>
-                    `<li>${step}</li>`
-                )
-                .join("")}
-
-        </ol>
-
-
-        <h4>Estimated Cost</h4>
-
-        <div class="nutrition-grid">
-
-            <div>
-                <strong>
-                    ₱${recipe.estimated_cost}
-                </strong>
-
-                <span>
-                    Total Cost
-                </span>
-            </div>
-
-            <div>
-                <strong>
-                    ₱${(
-                        recipe.estimated_cost /
-                        recipe.servings
-                    ).toFixed(2)}
-                </strong>
-
-                <span>
-                    Per Serving
-                </span>
-            </div>
-
-        </div>
-    `;
-
-
-    document
-        .getElementById("modalOverlay")
-        .classList
-        .add("open");
-
-
-    document.body.style.overflow =
-        "hidden";
-}
-
-
-function closeModal() {
-
-    document
-        .getElementById("modalOverlay")
-        .classList
-        .remove("open");
-
-
-    document.body.style.overflow =
-        "";
-}
-
-
-function clearSearch() {
-
-    document.getElementById("searchInput").value = "";
-
-    document.getElementById("budgetInput").value = "";
-
-    applyFiltersAndRender();
-}
-
-
-document
-    .getElementById("searchInput")
-    .addEventListener(
-        "input",
-        applyFiltersAndRender
-    );
-
-
-loadRecipes();
+document.addEventListener("click", e => {
+    const n = e.target.closest("#nav button");
+    if (n) { $("#max").value = n.dataset.m === "all" ? "" : n.dataset.m; apply(); return $("#grid").scrollIntoView(); }
+    const r = e.target.closest("[data-id]"); if (r) openRecipe(r.dataset.id);
+});
+$("#more").onclick = () => { shown += PAGE; render(); };
+$("#go").onclick = () => { apply(); $("#grid").scrollIntoView(); };
+$("#q").addEventListener("input", apply);
+$("#max").addEventListener("input", apply);
+introHeader();
+load();

@@ -2,24 +2,27 @@
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recipe Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
 <style>
- html,body{height:100%;margin:0;font-family:system-ui,sans-serif}
+ html,body{height:100%;margin:0;font-family:Inter,system-ui,sans-serif;color:#1b1b1b}
  body{display:flex;flex-direction:column;background:#fff}
- .bar{display:flex;align-items:center;gap:6px;padding:8px 14px;background:#1f1f1f;color:#fff;flex-wrap:wrap}
- .bar b{margin-right:10px}
- .tab{border:0;background:transparent;color:#ddd;padding:9px 16px;border-radius:999px;font-size:.95rem;cursor:pointer}
- .tab:hover{background:#333}
- .tab.on{background:#fff;color:#111;font-weight:600}
- .sp{flex:1}
- .who{font-size:.85rem;display:flex;align-items:center;gap:8px}
- .role{padding:2px 8px;border-radius:12px;font-size:.72rem}
- .role.admin{background:#c1452a}.role.user{background:#6c7f55}.role.editor{background:#b8860b}
- .out{background:none;border:1px solid #666;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
- iframe{flex:1;width:100%;border:0;display:none}
- iframe.on{display:block}
+ .bar{display:flex;align-items:center;gap:8px;padding:10px 20px;background:#fff;border-bottom:1px solid #e9e9e9;flex-wrap:wrap;animation:dn .6s both}
+ @keyframes dn{from{opacity:0;transform:translateY(-12px)}}
+ .brand{font:800 1.4rem "Playfair Display",serif;margin-right:14px}.brand em{color:#ff6a3d}
+ .tab{border:0;background:none;color:#6f6f6f;padding:8px 16px;border-radius:999px;font:500 .9rem Inter;cursor:pointer;transition:background .25s,color .25s}
+ .tab:hover{color:#1b1b1b}.tab.on{background:#1b1b1b;color:#fff}
+ .sp{flex:1}.who{font-size:.85rem;display:flex;align-items:center;gap:8px;color:#6f6f6f}
+ .role{padding:2px 10px;border-radius:12px;font-size:.72rem;color:#fff}
+ .role.admin{background:#ff6a3d}.role.user{background:#6c7f55}.role.editor{background:#b8860b}
+ .out{background:none;border:1px solid #e9e9e9;border-radius:8px;padding:6px 12px;cursor:pointer;font:500 .8rem Inter}.out:hover{background:#f4f4f4}
+ iframe{flex:1;width:100%;border:0;display:none}iframe.on{display:block;animation:fi .4s both}
+ @keyframes fi{from{opacity:0}}
+ @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+ @media(max-width:560px){.brand{width:100%;margin:0}.who #name{display:none}}
 </style></head><body>
 <div class="bar">
-  <b>Recipe Hub</b>
+  <span class="brand">Recipe <em>Hub</em></span>
   <button class="tab" data-v="international">🌍 International</button>
   <button class="tab" data-v="budget">₱ Budget</button>
   <button class="tab" data-v="game">🎲 Pantry Game</button>
