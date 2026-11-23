@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 from datetime import datetime, timezone
 from typing import Optional
@@ -20,6 +21,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False,
                    allow_methods=["*"], allow_headers=["*"])
 
 STAFF = ("admin", "editor")
+
+
 _jwks = PyJWKClient(os.environ["SUPABASE_JWKS_URL"])
 
 
@@ -308,3 +311,36 @@ async def game_cook(request: Request, user=Depends(current_user)):
     else:
         result["hint"] = {"missing": len(need - picked), "extra": len(picked - need)}
     return result
+
+
+# ---------- favourites (the "mini cart" / cookbook) and profile stats ----------
+@app.get("/favorites")
+def list_favorites(user=Depends(current_user)):
+    ids = [r["recipe_id"] for r in db.table("favorites").select("recipe_id").eq("user_id", user["id"]).execute().data]
+    if not ids:
+        return {"recipes": []}
+    rows = db.table("recipes").select("*").in_("id", ids).execute().data
+    rt = rating_map()
+    return {"recipes": [shape(r, rt) for r in rows]}
+
+
+@app.put("/favorites/{recipe_id}")
+def add_favorite(recipe_id: int, user=Depends(current_user)):
+    db.table("favorites").upsert({"user_id": user["id"], "recipe_id": recipe_id},
+                                 on_conflict="user_id,recipe_id").execute()
+    return {"ok": True}
+
+
+@app.delete("/favorites/{recipe_id}")
+def remove_favorite(recipe_id: int, user=Depends(current_user)):
+    db.table("favorites").delete().eq("user_id", user["id"]).eq("recipe_id", recipe_id).execute()
+    return {"ok": True}
+
+
+@app.get("/me/stats")
+def my_stats(user=Depends(current_user)):
+    uid = user["id"]
+    count = lambda t, col="user_id": len(db.table(t).select(col).eq("user_id", uid).execute().data)
+    score = sum(r["score"] or 0 for r in db.table("user_game_progress").select("score").eq("user_id", uid).execute().data)
+    return {"saved": count("favorites"), "rated": count("recipe_ratings"),
+            "discovered": count("user_recipe_discoveries"), "score": score}
