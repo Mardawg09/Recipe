@@ -1,1 +1,1 @@
-{ "rewrites": [{ "source": "/api/:path*", "destination": "https://recipe-api-xi-two.vercel.app/:path*" }] }
+{ "rewrites": [{ "source": "/api/:path*", "destination": "https://cs-301-martin-benitez-api.vercel.app/:path*" }] }

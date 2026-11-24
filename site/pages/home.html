@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/theme.css"><link rel="stylesheet" href="../css/game.css"><title>Recipe Hub - Home</title></head>
+<body>
+<main class="wrap">
+  <section class="hero"><div><p class="kick">A kitchen without borders</p><h1>Cook something <em>good</em> tonight</h1>
+    <p>Filipino, Italian, Spanish, British, American and Chinese kitchens, with ingredients, steps and nutrition laid out plainly.</p>
+    <button class="btn" id="browse" style="margin-top:22px">Browse recipes</button></div>
+    <div class="wall" id="wall"></div></section>
+  <nav class="nav" id="nav" aria-label="Cuisines"></nav>
+  <section class="g3" id="top3"></section>
+  <section class="band rv" id="search"><h2>Hungry? Find a recipe.</h2>
+    <div class="sbox"><input id="q" type="search" placeholder="Recipe, ingredient or cuisine..." autocomplete="off"><button id="go">Search</button></div></section>
+  <h2 class="sec rv">Latest Recipes</h2>
+  <div class="cols"><div id="latest"></div>
+    <aside><div class="about rv"><div class="av">🍳</div><h4>Cook something good tonight</h4><p>Recipes from six kitchens, with ingredients, steps and nutrition laid out plainly.</p></div>
+      <h3 class="sec2 rv">Fresh Recipes</h3><div class="fresh" id="fresh"></div></aside></div>
+  <h2 class="sec big rv">Curated Collections</h2><section class="g3" id="collections"></section>
+  <h2 class="sec rv" id="grid">All Recipes <small id="count"></small></h2><section class="g3" id="all"></section>
+  <div class="more"><button id="more">Load more</button></div>
+</main>
+<script src="../js/auth.js"></script><script src="../js/common.js"></script><script src="../js/pages/home.js"></script>
+</body></html>
